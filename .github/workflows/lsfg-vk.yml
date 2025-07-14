@@ -1,0 +1,57 @@
+name: Update lsfg-vk
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  update-lsfg-vk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Get latest commit SHA from GitHub API
+        id: get-latest-commit
+        run: |
+          latest_commit=$(curl -s https://api.github.com/repos/PancakeTAS/lsfg-vk/commits | jq -r '.[0].sha')
+          echo "latest_commit=$latest_commit" >> $GITHUB_OUTPUT
+          echo "short_commit=$(echo $latest_commit | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Get current date
+        id: get-current-date
+        run: |
+          echo "current_date=$(date -u +'%Y%m%d')" >> $GITHUB_OUTPUT
+
+      - name: Get current commit in spec
+        id: get-current-commit
+        run: |
+          current_commit=$(grep -oP '(?<=^%global longcommit ).*' lsfg-vk.spec || echo "")
+          current_commit=$(echo "$current_commit" | tr -d '[:space:]')
+          echo "current_commit=$current_commit" >> $GITHUB_OUTPUT
+
+      - name: Compare commits
+        id: compare-commits
+        run: |
+          if [ "${{ steps.get-latest-commit.outputs.latest_commit }}" != "${{ steps.get-current-commit.outputs.current_commit }}" ]; then
+            echo "new-commit=true" >> $GITHUB_OUTPUT
+          else
+            echo "new-commit=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update Spec File
+        if: ${{ contains(steps.compare-commits.outputs.new-commit, 'true') }}
+        run: |
+          sed -i "s/^%global date .*/%global date ${{ steps.get-current-date.outputs.current_date }}/" lsfg-vk.spec
+          sed -i "s/^%global commit .*/%global commit ${{ steps.get-latest-commit.outputs.short_commit }}/" lsfg-vk.spec
+          sed -i "s/^%global longcommit .*/%global longcommit ${{ steps.get-latest-commit.outputs.latest_commit }}/" lsfg-vk.spec
+          
+      - name: Commit and Push Changes
+        if: ${{ contains(steps.compare-commits.outputs.new-commit, 'true') }}
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add lsfg-vk.spec
+          git commit -m "lsfg-vk.spec: Update commit, longcommit, and date macros"
+          git push
