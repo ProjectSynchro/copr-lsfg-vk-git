@@ -14,7 +14,7 @@ To revert this, remove the package with `sudo dnf remove lsfg-vk` and remove the
 
 For more info about setting this up for your usecase, see the upstream Wiki here: https://github.com/PancakeTAS/lsfg-vk/wiki
 
-### You will need to own Lossless Scaling on Steam for this to work.
+### You will need to own Lossless Scaling on Steam and have it installed for this to work.
 
 ## Issues
 
