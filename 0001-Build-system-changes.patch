@@ -1,0 +1,58 @@
+From 7f50c507dc8eecc5ed4bc1821c16a98e4198fc2b Mon Sep 17 00:00:00 2001
+From: Jack Greiner <jack@emoss.org>
+Date: Mon, 14 Jul 2025 17:43:04 -0400
+Subject: [PATCH] Build system changes.
+
+---
+ CMakeLists.txt                                     | 14 +++++++++++---
+ ...ion.json => VkLayer_LS_frame_generation.json.in |  2 +-
+ 2 files changed, 12 insertions(+), 4 deletions(-)
+ rename VkLayer_LS_frame_generation.json => VkLayer_LS_frame_generation.json.in (89%)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index dab32fe..28fe953 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,7 @@
+ cmake_minimum_required(VERSION 3.28)
+ 
++include(GNUInstallDirs)
++
+ set(CMAKE_C_COMPILER clang)
+ set(CMAKE_CXX_COMPILER clang++)
+ 
+@@ -82,6 +84,12 @@ endif()
+ 
+ # install
+ install(FILES "${CMAKE_BINARY_DIR}/liblsfg-vk.so"
+-    DESTINATION lib)
+-install(FILES "${CMAKE_SOURCE_DIR}/VkLayer_LS_frame_generation.json"
+-    DESTINATION share/vulkan/implicit_layer.d)
++    DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(FILES "${CMAKE_BINARY_DIR}/VkLayer_LS_frame_generation.json"
++    DESTINATION ${CMAKE_INSTALL_DATADIR}/vulkan/implicit_layer.d)
++
++configure_file(
++    ${CMAKE_SOURCE_DIR}/VkLayer_LS_frame_generation.json.in
++    ${CMAKE_BINARY_DIR}/VkLayer_LS_frame_generation.json
++    @ONLY
++)
+diff --git a/VkLayer_LS_frame_generation.json b/VkLayer_LS_frame_generation.json.in
+similarity index 89%
+rename from VkLayer_LS_frame_generation.json
+rename to VkLayer_LS_frame_generation.json.in
+index ece2a5f..ddd9ed4 100644
+--- a/VkLayer_LS_frame_generation.json
++++ b/VkLayer_LS_frame_generation.json.in
+@@ -4,7 +4,7 @@
+     "name": "VK_LAYER_LS_frame_generation",
+     "type": "GLOBAL",
+     "api_version": "1.4.313",
+-    "library_path": "../../../lib/liblsfg-vk.so",
++    "library_path": "@CMAKE_INSTALL_LIBDIR@/liblsfg-vk.so",
+     "implementation_version": "1",
+     "description": "Lossless Scaling frame generation layer",
+     "functions": {
+-- 
+2.50.1
+
