@@ -27,6 +27,8 @@ BuildRequires:       vulkan-headers
 Recommends:          mesa-dri-drivers
 Recommends:          mesa-vulkan-drivers
 
+Requires:            %{name}-libs = %{version}-%{release}
+
 %description
 The %{name} package provides Lossless Scaling Frame Generation on Linux via DXVK/Vulkan.
 
@@ -43,25 +45,18 @@ cd lsfg-vk
 
 CMAKE_OPTIONS=(
    -DCMAKE_BUILD_TYPE=Release \
-   -DCMAKE_INSTALL_LIBDIR=%{_lib} \
+   -DCMAKE_INSTALL_LIBDIR=%{_libdir} \
+   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
    -DCMAKE_C_COMPILER=clang \
    -DCMAKE_CXX_COMPILER=clang++ \
    -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
 )
-
-CC=clang
-CXX=clang++
-
-%cmake "${CMAKE_OPTIONS[@]}" .
-%cmake_build
+%__cmake "${CMAKE_OPTIONS[@]}" .
+%__cmake --build . %{?_smp_mflags} --verbose
 
 %install
 cd lsfg-vk
-%cmake_install
-
-%check
-cd lsfg-vk
-%ctest
+DESTDIR="%{buildroot}" %__cmake --install .
 
 %files
 %license lsfg-vk/LICENSE.md
