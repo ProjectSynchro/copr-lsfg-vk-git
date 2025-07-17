@@ -14,10 +14,28 @@ jobs:
 
       - name: Get latest commit SHA from GitHub API
         id: get-latest-commit
+        continue-on-error: true
         run: |
-          latest_commit=$(curl -s https://api.github.com/repos/PancakeTAS/lsfg-vk/commits | jq -r '.[0].sha')
-          echo "latest_commit=$latest_commit" >> $GITHUB_OUTPUT
-          echo "short_commit=$(echo $latest_commit | cut -c1-7)" >> $GITHUB_OUTPUT
+          max_retries=5
+          attempt=0
+          success=false
+
+          while [ $attempt -lt $max_retries ]; do
+            echo "Attempt $((attempt+1)) to fetch latest commit..."
+            latest_commit=$(curl -s --fail https://api.github.com/repos/PancakeTAS/lsfg-vk/commits | jq -r '.[0].sha') && success=true && break
+            attempt=$((attempt+1))
+            sleep 5
+          done
+
+          if [ "$success" = true ]; then
+            short_commit=$(echo "$latest_commit" | cut -c1-7)
+            echo "latest_commit=$latest_commit" >> $GITHUB_OUTPUT
+            echo "short_commit=$short_commit" >> $GITHUB_OUTPUT
+          else
+            echo "Failed to fetch commit after $max_retries attempts."
+            echo "latest_commit=" >> $GITHUB_OUTPUT
+            echo "short_commit=" >> $GITHUB_OUTPUT
+          fi
 
       - name: Get current date
         id: get-current-date
@@ -34,21 +52,29 @@ jobs:
       - name: Compare commits
         id: compare-commits
         run: |
-          if [ "${{ steps.get-latest-commit.outputs.latest_commit }}" != "${{ steps.get-current-commit.outputs.current_commit }}" ]; then
+          latest="${{ steps.get-latest-commit.outputs.latest_commit }}"
+          current="${{ steps.get-current-commit.outputs.current_commit }}"
+
+          if [ -z "$latest" ]; then
+            echo "No latest commit fetched. Skipping update."
+            echo "new-commit=false" >> $GITHUB_OUTPUT
+          elif [ "$latest" != "$current" ]; then
+            echo "New commit found: $latest"
             echo "new-commit=true" >> $GITHUB_OUTPUT
           else
+            echo "No update required."
             echo "new-commit=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Update Spec File
-        if: ${{ contains(steps.compare-commits.outputs.new-commit, 'true') }}
+        if: ${{ steps.compare-commits.outputs.new-commit == 'true' }}
         run: |
           sed -i "s/^%global date .*/%global date ${{ steps.get-current-date.outputs.current_date }}/" lsfg-vk.spec
           sed -i "s/^%global commit .*/%global commit ${{ steps.get-latest-commit.outputs.short_commit }}/" lsfg-vk.spec
           sed -i "s/^%global longcommit .*/%global longcommit ${{ steps.get-latest-commit.outputs.latest_commit }}/" lsfg-vk.spec
           
       - name: Commit and Push Changes
-        if: ${{ contains(steps.compare-commits.outputs.new-commit, 'true') }}
+        if: ${{ steps.compare-commits.outputs.new-commit == 'true' }}
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
