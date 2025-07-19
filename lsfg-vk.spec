@@ -1,7 +1,7 @@
 %global tag 0
-%global date 20250718
-%global commit 15d9864
-%global longcommit 15d9864d0b9da30c2096c78ba4381eb5cb3b03e8
+%global date 20250719
+%global commit 41f81fb
+%global longcommit 41f81fb832e617bc55ec99f501f36f2c3df34c09
 
 Name:           lsfg-vk
 Version:        %{tag}
