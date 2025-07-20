@@ -29,6 +29,15 @@ BuildRequires:       pkgconfig(wayland-egl) >= 0.2.7
 BuildRequires:       pkgconfig(xkbcommon) >= 0.5.0
 BuildRequires:       pkgconfig(x11)
 BuildRequires:       pkgconfig(xext)
+BuildRequires:       pkgconfig(xrandr)
+BuildRequires:       pkgconfig(xinerama)
+BuildRequires:       pkgconfig(xkbcommon) >= 0.5.0
+BuildRequires:       pkgconfig(xcursor)
+BuildRequires:       pkgconfig(xi)
+BuildRequires:       pkgconfig(wayland-client) >= 0.2.7
+BuildRequires:       pkgconfig(wayland-cursor) >= 0.2.7
+BuildRequires:       pkgconfig(wayland-egl) >= 0.2.7
+BuildRequires:       pkgconfig(wayland-protocols)
 
 Recommends:          mesa-dri-drivers
 Recommends:          mesa-vulkan-drivers
