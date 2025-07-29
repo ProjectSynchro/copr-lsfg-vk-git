@@ -12,8 +12,6 @@ Summary:        Lossless Scaling Frame Generation on Linux via DXVK/Vulkan.
 License:        MIT
 URL:            https://github.com/PancakeTAS/lsfg-vk
 
-Patch0:         0001-Build-system-changes.patch
-
 BuildRequires:       clang
 BuildRequires:       llvm
 BuildRequires:       cmake
@@ -50,15 +48,11 @@ cd lsfg-vk
 git checkout %{longcommit}
 git submodule update --init --recursive
 
-%autopatch -p1
-
 %build
 cd lsfg-vk
 
 CMAKE_OPTIONS=(
    -DCMAKE_BUILD_TYPE=Release \
-   -DCMAKE_INSTALL_LIBDIR=%{_libdir} \
-   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
    -DCMAKE_C_COMPILER=clang \
    -DCMAKE_CXX_COMPILER=clang++ \
    -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
@@ -68,7 +62,10 @@ CMAKE_OPTIONS=(
 
 %install
 cd lsfg-vk
-DESTDIR="%{buildroot}" %__cmake --install .
+
+# Install the Vulkan layer JSON file and shared library
+install -Dm644 VkLayer_LS_frame_generation.json "%{buildroot}/%{_datadir}/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json"
+install -Dm644 liblsfg-vk.so "%{buildroot}/%{_libdir}/liblsfg-vk.so"
 
 %files
 %license lsfg-vk/LICENSE.md
