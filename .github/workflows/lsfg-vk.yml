@@ -46,11 +46,6 @@ jobs:
             echo "latest_tag=" >> $GITHUB_OUTPUT
           fi
 
-      - name: Get current date
-        id: get-current-date
-        run: |
-          echo "current_date=$(date -u +'%Y%m%d')" >> $GITHUB_OUTPUT
-
       - name: Get current commit in spec
         id: get-current-commit
         run: |
@@ -78,7 +73,6 @@ jobs:
       - name: Update Spec File
         if: ${{ steps.compare-commits.outputs.new-commit == 'true' }}
         run: |
-          sed -i "s/^%global date .*/%global date ${{ steps.get-current-date.outputs.current_date }}/" lsfg-vk.spec
           sed -i "s/^%global commit .*/%global commit ${{ steps.get-latest-commit.outputs.short_commit }}/" lsfg-vk.spec
           sed -i "s/^%global longcommit .*/%global longcommit ${{ steps.get-latest-commit.outputs.latest_commit }}/" lsfg-vk.spec
           sed -i "s/^%global tag .*/%global tag ${{ steps.get-latest-commit.outputs.latest_tag }}/" lsfg-vk.spec

@@ -1,5 +1,5 @@
 %global tag 0.9.0
-%global date 20250729
+%global date %(date +%Y%m%d)
 %global commit c7b6e1a
 %global longcommit c7b6e1a47c39decf66d1a41a38a9a07472d3fe4d
 
@@ -16,6 +16,7 @@ BuildRequires:       clang
 BuildRequires:       llvm
 BuildRequires:       cmake
 BuildRequires:       cmake-rpm-macros
+BuildRequires:       cargo-rpm-macros >= 24
 BuildRequires:       ninja-build
 BuildRequires:       git
 BuildRequires:       pkgconfig(gl)
@@ -60,12 +61,21 @@ CMAKE_OPTIONS=(
 %__cmake "${CMAKE_OPTIONS[@]}" .
 %__cmake --build . %{?_smp_mflags} --verbose
 
+cd ui
+# Call on cargo directly, need to wait for various rust packages to be updated
+%__cargo build --release --locked
+
 %install
 cd lsfg-vk
 
 # Install the Vulkan layer JSON file and shared library
 install -Dm644 VkLayer_LS_frame_generation.json "%{buildroot}/%{_datadir}/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json"
 install -Dm644 liblsfg-vk.so "%{buildroot}/%{_libdir}/liblsfg-vk.so"
+
+# Install the UI binary and desktop bits (for ui subpackage)
+install -Dm755 ui/target/release/lsfg-vk-ui "%{buildroot}%{_bindir}/lsfg-vk-ui"
+install -Dm644 ui/rsc/gay.pancake.lsfg-vk-ui.desktop "%{buildroot}%{_datadir}/applications/lsfg-vk-ui.desktop"
+install -Dm644 ui/rsc/icon.png "%{buildroot}%{_datadir}/icons/hicolor/256x256/apps/gay.pancake.lsfg-vk-ui.png"
 
 %files
 %license lsfg-vk/LICENSE.md
@@ -78,6 +88,17 @@ Summary:       lsfg-vk libraries
 
 %files libs
 %{_libdir}/liblsfg-vk.so
+
+%package ui
+Summary:       Rust-based GUI for modifying lsfg-vk configuration
+Requires:      %{name} = %{version}-%{release}
+%description ui
+This package provides the GUI for modifying configuration of lsfg-vk.
+
+%files ui
+%{_bindir}/lsfg-vk-ui
+%{_datadir}/applications/lsfg-vk-ui.desktop
+%{_datadir}/icons/hicolor/256x256/apps/gay.pancake.lsfg-vk-ui.png
 
 %changelog
 %autochangelog
