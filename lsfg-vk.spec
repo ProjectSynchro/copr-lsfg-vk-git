@@ -20,6 +20,7 @@ BuildRequires:       cargo-rpm-macros >= 24
 BuildRequires:       ninja-build
 BuildRequires:       git
 BuildRequires:       pkgconfig(gl)
+BuildRequires:       pkgconfig(glib-2.0)
 BuildRequires:       pkgconfig(vulkan)
 BuildRequires:       pkgconfig(SPIRV-Headers)
 BuildRequires:       vulkan-headers
