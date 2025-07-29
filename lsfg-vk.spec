@@ -20,7 +20,6 @@ BuildRequires:       cargo-rpm-macros >= 24
 BuildRequires:       ninja-build
 BuildRequires:       git
 BuildRequires:       pkgconfig(gl)
-BuildRequires:       pkgconfig(glib-2.0)
 BuildRequires:       pkgconfig(vulkan)
 BuildRequires:       pkgconfig(SPIRV-Headers)
 BuildRequires:       vulkan-headers
@@ -35,6 +34,14 @@ BuildRequires:       pkgconfig(xinerama)
 BuildRequires:       pkgconfig(xcursor)
 BuildRequires:       pkgconfig(xi)
 BuildRequires:       pkgconfig(wayland-protocols)
+
+# UI dependencies
+BuildRequires:       pkgconfig(glib-2.0)
+BuildRequires:       pkgconfig(pango)
+BuildRequires:       pkgconfig(gdk-pixbuf-2.0)
+BuildRequires:       pkgconfig(graphene-gobject-1.0)
+BuildRequires:       pkgconfig(gtk4)
+BuildRequires:       pkgconfig(libadwaita-1)
 
 Recommends:          mesa-dri-drivers
 Recommends:          mesa-vulkan-drivers
