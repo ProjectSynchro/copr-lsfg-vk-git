@@ -37,6 +37,7 @@ BuildRequires:       pkgconfig(wayland-protocols)
 
 Recommends:          mesa-dri-drivers
 Recommends:          mesa-vulkan-drivers
+Recommends:          lsfg-vk-ui
 
 Requires:            %{name}-libs = %{version}-%{release}
 
