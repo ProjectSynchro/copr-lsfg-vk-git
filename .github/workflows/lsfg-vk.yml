@@ -12,7 +12,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Get latest commit SHA from GitHub API
+      - name: Get latest commit SHA and tag from GitHub API
         id: get-latest-commit
         continue-on-error: true
         run: |
@@ -21,20 +21,23 @@ jobs:
           success=false
 
           while [ $attempt -lt $max_retries ]; do
-            echo "Attempt $((attempt+1)) to fetch latest commit..."
-            latest_commit=$(curl -s --fail https://api.github.com/repos/PancakeTAS/lsfg-vk/commits | jq -r '.[0].sha') && success=true && break
-            attempt=$((attempt+1))
-            sleep 5
+            echo "Attempt $((attempt+1)) to fetch latest commit and tag..."
+            latest_commit=$(curl -s --fail https://api.github.com/repos/PancakeTAS/lsfg-vk/commits | jq -r '.[0].sha') || { attempt=$((attempt+1)); sleep 5; continue; }
+            latest_tag=$(curl -s --fail https://api.github.com/repos/PancakeTAS/lsfg-vk/tags | jq -r '.[0].name') || { attempt=$((attempt+1)); sleep 5; continue; }
+            success=true
+            break
           done
 
           if [ "$success" = true ]; then
             short_commit=$(echo "$latest_commit" | cut -c1-7)
             echo "latest_commit=$latest_commit" >> $GITHUB_OUTPUT
             echo "short_commit=$short_commit" >> $GITHUB_OUTPUT
+            echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
           else
-            echo "Failed to fetch commit after $max_retries attempts."
+            echo "Failed to fetch commit/tag after $max_retries attempts."
             echo "latest_commit=" >> $GITHUB_OUTPUT
             echo "short_commit=" >> $GITHUB_OUTPUT
+            echo "latest_tag=" >> $GITHUB_OUTPUT
           fi
 
       - name: Get current date
@@ -72,6 +75,7 @@ jobs:
           sed -i "s/^%global date .*/%global date ${{ steps.get-current-date.outputs.current_date }}/" lsfg-vk.spec
           sed -i "s/^%global commit .*/%global commit ${{ steps.get-latest-commit.outputs.short_commit }}/" lsfg-vk.spec
           sed -i "s/^%global longcommit .*/%global longcommit ${{ steps.get-latest-commit.outputs.latest_commit }}/" lsfg-vk.spec
+          sed -i "s/^%global tag .*/%global tag ${{ steps.get-latest-commit.outputs.latest_tag }}/" lsfg-vk.spec
           
       - name: Commit and Push Changes
         if: ${{ steps.compare-commits.outputs.new-commit == 'true' }}
@@ -79,5 +83,5 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add lsfg-vk.spec
-          git commit -m "lsfg-vk.spec: Update commit, longcommit, and date macros"
+          git commit -m "lsfg-vk.spec: Update commit, longcommit, tag and date macros"
           git push
