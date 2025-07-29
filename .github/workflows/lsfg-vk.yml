@@ -24,7 +24,9 @@ jobs:
             echo "Attempt $((attempt+1)) to fetch latest commit and tag..."
             latest_commit=$(curl -s --fail https://api.github.com/repos/PancakeTAS/lsfg-vk/commits | jq -r '.[0].sha')
             latest_tag=$(curl -s --fail https://api.github.com/repos/PancakeTAS/lsfg-vk/tags | jq -r '.[0].name')
-            if [ -n "$latest_commit" ] && [ -n "$latest_tag" ] && [ "$latest_commit" != "null" ] && [ "$latest_tag" != "null" ]; then
+            # Remove leading non-digit characters (e.g., 'v' or 'release-')
+            clean_tag=$(echo "$latest_tag" | sed 's/^[^0-9]*//')
+            if [ -n "$latest_commit" ] && [ -n "$clean_tag" ] && [ "$latest_commit" != "null" ] && [ "$clean_tag" != "null" ]; then
               success=true
               break
             fi
@@ -36,7 +38,7 @@ jobs:
             short_commit=$(echo "$latest_commit" | cut -c1-7)
             echo "latest_commit=$latest_commit" >> $GITHUB_OUTPUT
             echo "short_commit=$short_commit" >> $GITHUB_OUTPUT
-            echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
+            echo "latest_tag=$clean_tag" >> $GITHUB_OUTPUT
           else
             echo "Failed to fetch commit/tag after $max_retries attempts."
             echo "latest_commit=" >> $GITHUB_OUTPUT
