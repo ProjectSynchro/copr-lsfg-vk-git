@@ -22,10 +22,14 @@ jobs:
 
           while [ $attempt -lt $max_retries ]; do
             echo "Attempt $((attempt+1)) to fetch latest commit and tag..."
-            latest_commit=$(curl -s --fail https://api.github.com/repos/PancakeTAS/lsfg-vk/commits | jq -r '.[0].sha') || { attempt=$((attempt+1)); sleep 5; continue; }
-            latest_tag=$(curl -s --fail https://api.github.com/repos/PancakeTAS/lsfg-vk/tags | jq -r '.[0].name') || { attempt=$((attempt+1)); sleep 5; continue; }
-            success=true
-            break
+            latest_commit=$(curl -s --fail https://api.github.com/repos/PancakeTAS/lsfg-vk/commits | jq -r '.[0].sha')
+            latest_tag=$(curl -s --fail https://api.github.com/repos/PancakeTAS/lsfg-vk/tags | jq -r '.[0].name')
+            if [ -n "$latest_commit" ] && [ -n "$latest_tag" ] && [ "$latest_commit" != "null" ] && [ "$latest_tag" != "null" ]; then
+              success=true
+              break
+            fi
+            attempt=$((attempt+1))
+            sleep 5
           done
 
           if [ "$success" = true ]; then
