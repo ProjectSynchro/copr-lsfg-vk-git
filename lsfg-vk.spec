@@ -1,7 +1,7 @@
 %global tag 1.0.0
 %global date %(date +%Y%m%d)
-%global commit 60baec1
-%global longcommit 60baec1e2682e669b0ec277e6690cb7135f1e19c
+%global commit 0a6455a
+%global longcommit 0a6455a3815e4a417a54fd312987d2e2320f2684
 
 Name:           lsfg-vk
 Version:        %{tag}
