@@ -1,3 +1,6 @@
+> ⚠️ **Notice:**  
+> This project has migrated to **[Codeberg](https://codeberg.org/Synchro/copr-lsfg-vk-git)**. 
+
 Copr repository for COPR repo for https://github.com/PancakeTAS/lsfg-vk, commits are fetched every hour.
 
 The packages in this repo should work on Fedora 41+.
